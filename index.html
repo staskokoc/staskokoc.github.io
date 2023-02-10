@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Markdown Viewer</title>
+    <style>
+      .navigation {
+        width: 25%;
+        float: left;
+        position: fixed;
+      }
+      .content {
+        width: 75%;
+        float: right;
+        flex-grow: 1
+        padding-left: 20px;
+        margin-left: 25%;
+
+      }
+      .container {
+        display: flex;
+        width: 25%;
+        float: left;
+        position: fixed;
+      }
+      .nav-item {
+        cursor: pointer;
+      }
+      .submenu {
+        display: none;
+        margin-left: 20px;
+      }
+      .nav-item.active .submenu {
+        display: block;
+      }
+    </style>
+</head>
+
+
+
+<body>
+  <div id="nav">
+  </div>
+  <div id="content">
+  </div>
+
+
+
+  <script>
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "android-overview.md", true);
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        // convert the markdown content to HTML
+        var md = new Remarkable();
+        var content = md.render(xhr.responseText);
+        document.getElementById("content").innerHTML = content;
+
+        // extract the chapters from the HTML content
+        var chapters = content.match(/<h[1-6].*?>(.*?)<\/h[1-6]>/g);
+
+        // create a navigation menu
+        var nav = document.getElementById("nav");
+        for (var i = 0; i < chapters.length; i++) {
+          var chapter = chapters[i];
+          var title = chapter.match(/<h[1-6].*?>(.*?)<\/h[1-6]>/)[1];
+          var item = document.createElement("div");
+          item.innerHTML = title;
+          nav.appendChild(item);
+        }
+
+        // navigate to the corresponding chapter when a menu item is clicked
+        nav.addEventListener("click", function(e) {
+          var target = e.target;
+          var title = target.innerHTML;
+          var chapter = content.indexOf("<h1>" + title + "</h1>");
+          if (chapter !== -1) {
+            var start = content.lastIndexOf("<h1>", chapter);
+            var end = content.indexOf("</h1>", chapter) + 5;
+            document.getElementById("content").innerHTML = content.substring(start, end);
+          }
+        });
+      }
+    };
+    xhr.send();
+  </script>
+</body>
+</html>
+
+
+
+
+
+<style>
+  /* Общие стили */
+  body {
+    background-color:#1a1a1a;
+    color:white;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: row;
+  }
+</style>
